@@ -16,28 +16,34 @@ import software.amazon.awssdk.services.ec2.model.UnmonitorInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RebootInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.StopInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.StartInstancesRequest;
+import com.amazonaws.util.Base64;
 
 public class EC2 {
-    public static String createEC2Instance(Ec2Client ec2,String name, String amiId ) {
 
+    private static final String amiId = "ami-04902260ca3d33422";
+
+
+
+    public static String createEC2Instance(Ec2Client ec2,String name, String userData, int maxCount, String tag ) {
         RunInstancesRequest runRequest = RunInstancesRequest.builder()
                 .imageId(amiId)
                 .instanceType(InstanceType.T2_MICRO)
-                .maxCount(1)
+                .maxCount(maxCount)
                 .minCount(1)
+                .userData(Base64.encodeAsString(userData.getBytes()))
                 .build();
 
         RunInstancesResponse response = ec2.runInstances(runRequest);
         String instanceId = response.instances().get(0).instanceId();
 
-        Tag tag = Tag.builder()
+        Tag ttag = Tag.builder()
                 .key("Name")
-                .value(name)
+                .value(tag)
                 .build();
 
         CreateTagsRequest tagRequest = CreateTagsRequest.builder()
                 .resources(instanceId)
-                .tags(tag)
+                .tags(ttag)
                 .build();
 
         try {
@@ -95,7 +101,6 @@ public class EC2 {
 
 
     public static void describeEC2Instances( Ec2Client ec2){
-
         boolean done = false;
         String nextToken = null;
 
