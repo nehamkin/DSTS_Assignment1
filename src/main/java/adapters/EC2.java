@@ -22,8 +22,6 @@ public class EC2 {
 
     private static final String amiId = "ami-04902260ca3d33422";
 
-
-
     public static String createEC2Instance(Ec2Client ec2,String name, String userData, int maxCount, String tag ) {
         RunInstancesRequest runRequest = RunInstancesRequest.builder()
                 .imageId(amiId)
@@ -100,7 +98,7 @@ public class EC2 {
     }
 
 
-    public static void describeEC2Instances( Ec2Client ec2){
+    public void describeEC2Instances( Ec2Client ec2){
         boolean done = false;
         String nextToken = null;
 

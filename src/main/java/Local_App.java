@@ -42,13 +42,13 @@ public class Local_App {
     private static boolean taskCompleted = false;
 
     //-----------------------------------------------------------------------
-    public void startInstance(String instanceId){
+    public static void startInstance(String instanceId){
         StartInstancesRequest startRequest = StartInstancesRequest.builder()
                 .instanceIds(instanceId).build();
         ec2.startInstances(startRequest);
     }
 
-    public String getOrCreateManager(String arn){ //TODO: Need to add data parameter
+    public static String getOrCreateManager(String arn){ //TODO: Need to add data parameter
         Filter filter = Filter.builder()
                 .name("manager")
                 .values("running", "stopped")
@@ -86,7 +86,7 @@ public class Local_App {
         return createManagerInstance("ami-04902260ca3d33422", arn);
     }
 
-    private String createManagerInstance(String amiId, String arn) {
+    private static String createManagerInstance(String amiId, String arn) {
         RunInstancesRequest runRequest = RunInstancesRequest.builder()
                 .instanceType(InstanceType.T2_MICRO)
                 .imageId(amiId)
@@ -125,7 +125,7 @@ public class Local_App {
         return instanceId;
     }
 
-    private String geManagerScript(String arn) {
+    private static String geManagerScript(String arn) {
         String script = "#!/bin/bash\n"+
                 "sudo yum install -y java-1.8.0-openjdk\n" +
                 "sudo yum update -y\n" ;
@@ -233,7 +233,7 @@ public class Local_App {
      */
     public static void main (String[] args){
         BasicConfigurator.configure();
-
+        getSecurityDetails();
         if(args.length == 3 || args.length == 4) {
             if (args.length == 4) {
                 if (args[3].equals("terminate")){
@@ -247,7 +247,7 @@ public class Local_App {
 //                CreateBucketResponse outputBucket =s3.createBucket(localAppIdOutputBucketName);
 //                sqs.initQueue(managerToMeQName, "10000");
 //                startManager();
-
+                getOrCreateManager(arn);
                 try {
 //                    uploadFiles(new File(("C:\\Users\\orrin\\Desktop\\DSTS ORRI\\src\\main\\resources\\crazyinput.txt")));
 //                    String msgToManager = localAppId + "\t" + nameOfFileInBucket;
