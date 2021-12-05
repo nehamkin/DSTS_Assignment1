@@ -119,8 +119,13 @@ public class Manager {
     public void terminate(){
     }
 
+    public static void handleMessage(Message msg){
+
+    }
+
     public static void main (String[] args){
-        BasicConfigurator.configure();
+//        BasicConfigurator.configure();
+
 
         //Start workers
         for (int i = 0; i <5 ; i++) {
@@ -130,6 +135,7 @@ public class Manager {
             List<Message> messages = getMessageFromLocalApp();
             for(Message msg : messages){
                 try {
+                    handleMessage(msg);
                     handleMessage(msg.body());
                 }catch (Exception e){
                     System.out.println("an error occurred handling the file  "+ e.getMessage());

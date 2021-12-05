@@ -1,13 +1,10 @@
 import adapters.S3Adapter;
 import adapters.SQS;
 import org.apache.log4j.BasicConfigurator;
-import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.model.CreateBucketResponse;
-import software.amazon.awssdk.services.s3.model.PutObjectResponse;
-import software.amazon.awssdk.services.sqs.model.CreateQueueResponse;
 import software.amazon.awssdk.services.sqs.model.Message;
 
 import javax.swing.text.html.HTML;
@@ -16,9 +13,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,13 +43,8 @@ public class Local_App {
     }
 
     public static String getOrCreateManager(String arn){ //TODO: Need to add data parameter
-        Filter filter = Filter.builder()
-                .name("manager")
-                .values("running", "stopped")
-                .build();
 
         DescribeInstancesRequest request = DescribeInstancesRequest.builder()
-                .filters(filter)
                 .build();
 
         String nextToken;
@@ -87,15 +76,16 @@ public class Local_App {
     }
 
     private static String createManagerInstance(String amiId, String arn) {
+        IamInstanceProfileSpecification role = IamInstanceProfileSpecification.builder().name("LabInstanceProfile").build();
+
         RunInstancesRequest runRequest = RunInstancesRequest.builder()
                 .instanceType(InstanceType.T2_MICRO)
                 .imageId(amiId)
                 .keyName(keyName)
                 .maxCount(1)
                 .minCount(1)
-//                .securityGroups("launch-wizard-5")
-                .userData(geManagerScript(arn))
-//                .iamInstanceProfile(IamInstanceProfileSpecification.builder().arn(arn).build())
+                .userData(getManagerScript(arn))
+                .iamInstanceProfile(role)
                 .build();
 
         RunInstancesResponse response = ec2.runInstances(runRequest);
@@ -125,14 +115,13 @@ public class Local_App {
         return instanceId;
     }
 
-    private static String geManagerScript(String arn) {
-        String script = "#!/bin/bash\n"+
+    private static String getManagerScript(String arn) {
+        String script =  "#!/bin/bash\n" +
                 "sudo yum install -y java-1.8.0-openjdk\n" +
-                "sudo yum update -y\n" ;
-        script += "sudo mkdir jars\n";
-        script += "cd jars\n";
-        script += "sudo aws s3 cp s3://bucketqoghawn0ehuw2njlvyexsmxt5dczxfwc/Manager.jar ./\n";
-        script += "sudo java -Xmx30g -jar ./Manager.jar ami-0878fb723a9a1c5db " + keyName + " " +  arn;
+                "sudo yum update -y\n" +
+                "mkdir jars\n" +
+                "aws s3 cp s3://jarsbucketorri/Manager.jar ./jars/Manager.jar\n" +
+                "java -jar /jars/Manager.jar\n";
 
         return new String(java.util.Base64.getEncoder().encode(script.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
     }
@@ -243,30 +232,30 @@ public class Local_App {
             }
 
             if(!terminate) {
-//                CreateBucketResponse inputBucket = s3.createBucket(localAppIdInputBucketName);
-//                CreateBucketResponse outputBucket =s3.createBucket(localAppIdOutputBucketName);
-//                sqs.initQueue(managerToMeQName, "10000");
-//                startManager();
+                CreateBucketResponse inputBucket = s3.createBucket(localAppIdInputBucketName);
+                CreateBucketResponse outputBucket =s3.createBucket(localAppIdOutputBucketName);
+                sqs.initQueue(managerToMeQName, "10000");
+                startManager();
                 getOrCreateManager(arn);
                 try {
-//                    uploadFiles(new File(("C:\\Users\\orrin\\Desktop\\DSTS ORRI\\src\\main\\resources\\crazyinput.txt")));
-//                    String msgToManager = localAppId + "\t" + nameOfFileInBucket;
-//                    sqs.sendMessage(msgToManager, localAppToManagerQueueUrl);
+                    uploadFiles(new File(("C:\\Users\\orrin\\Desktop\\DSTS ORRI\\src\\main\\resources\\crazyinput.txt")));
+                    String msgToManager = localAppId + "\t" + nameOfFileInBucket;
+                    sqs.sendMessage(msgToManager, localAppToManagerQueueUrl);
 
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 finally {
-//                    while(!taskCompleted){
-//                        List<Message> messages = sqs.retrieveMessages(sqs.getQueueURL(managerToMeQName));
-//                        for(Message msg : messages){
-//                            if(msg.body().equals("completed"))
-//                                taskCompleted = true;
-//                        }
-//                    }
-//                    System.out.println("DELETED BUCKETS!!!");
-//                    deleteMyBuckets();
-//                    deleteQueue();
+                    while(!taskCompleted){
+                        List<Message> messages = sqs.retrieveMessages(sqs.getQueueURL(managerToMeQName));
+                        for(Message msg : messages){
+                            if(msg.body().equals("completed"))
+                                taskCompleted = true;
+                        }
+                    }
+                    System.out.println("DELETED BUCKETS!!!");
+                    deleteMyBuckets();
+                    deleteQueue();
                 }
             }
         }
