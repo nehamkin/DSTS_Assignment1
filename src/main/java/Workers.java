@@ -63,19 +63,19 @@ public class Workers {
     }
 
     public static void main (String[] args) throws Exception {
-//        while(!terminate){
-//            List<Message> messages = getMessage();
-//            for(Message msg : messages){
-//                try {
-//                    handleMessage(msg.body());
-//                }catch (Exception e){
-//                    System.out.println("an error occurred handling the file  "+ e.getMessage());
-//                }
-//            }
-//
-//        }
-        String msg = getMessage1();
-        handleMessage(msg);
+        while(!terminate){
+            List<Message> messages = getMessage();
+            for(Message msg : messages){
+                try {
+                    handleMessage(msg.body());
+                }catch (Exception e){
+                    System.out.println("an error occurred handling the file  "+ e.getMessage());
+                }
+            }
+
+        }
+//        String msg = getMessage1();
+//        handleMessage(msg);
 
         //terminate
     }

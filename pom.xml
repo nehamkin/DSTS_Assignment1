@@ -1,19 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <modules>
-        <module>Manager</module>
-    </modules>
+
+    <groupId>com.cloud.app</groupId>
+    <artifactId>cloud_app</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>cloud_app</name>
+    <packaging>jar</packaging>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <aws.java.sdk.version>2.17.81</aws.java.sdk.version>
     </properties>
-    <groupId>org.example</groupId>
-    <artifactId>DSTSAssignment</artifactId>
-    <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
-    <name>ASSIGNMENT1</name>
+
+<!--    <groupId>org.example</groupId>-->
+<!--    <artifactId>DSTSAssignment</artifactId>-->
+<!--    <packaging>pom</packaging>-->
+<!--    <version>1.0-SNAPSHOT</version>-->
+<!--    <name>ASSIGNMENT1</name>-->
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -96,6 +105,7 @@
             <artifactId>pdfbox-tools</artifactId>
             <version>2.0.0-RC1</version>
         </dependency>
+
     </dependencies>
     <build>
         <plugins>
@@ -104,9 +114,68 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>make-manager</id>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <mainClass>com.cloud.app.Manager</mainClass>
+                                </manifest>
+                            </archive>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <finalName>Manager_exec</finalName>
+                        </configuration>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>assembly</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>make-worker</id>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <mainClass>com.cloud.app.Worker</mainClass>
+                                </manifest>
+                            </archive>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <finalName>Worker_exec</finalName>
+                        </configuration>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>assembly</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>make-App</id>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <mainClass>com.cloud.app.App</mainClass>
+                                </manifest>
+                            </archive>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <finalName>App_exec</finalName>
+                        </configuration>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>assembly</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

@@ -89,13 +89,13 @@ public class Manager {
         if(messages.length == 0)
             return;
         if(messages[0] == "terminate"){
-            terminate =false;
+            terminate =true;
             return;
         }
         if(messages.length >= 2){
             String localAppId = messages[0];
             String keyInBucket = messages[1];
-            InputStream is = s3.getObject(localAppId,keyInBucket);
+            InputStream is = s3.getObject(localAppId+"input",keyInBucket);
             try{
             String message = convertInputStreamToString(is);
             String[] lines = message.split("\n");
@@ -135,7 +135,6 @@ public class Manager {
             List<Message> messages = getMessageFromLocalApp();
             for(Message msg : messages){
                 try {
-                    handleMessage(msg);
                     handleMessage(msg.body());
                 }catch (Exception e){
                     System.out.println("an error occurred handling the file  "+ e.getMessage());
