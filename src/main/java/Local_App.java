@@ -8,10 +8,8 @@ import software.amazon.awssdk.services.s3.model.CreateBucketResponse;
 import software.amazon.awssdk.services.sqs.model.Message;
 
 import javax.swing.text.html.HTML;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.awt.*;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
@@ -125,6 +123,32 @@ public class Local_App {
 
         return new String(java.util.Base64.getEncoder().encode(script.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
     }
+
+
+    private static void createHtmlSummeryHTML(InputStream summaryFile) throws IOException {
+        File htmlSummary = new File("htmlSummary.html");
+        BufferedWriter bw = new BufferedWriter(new FileWriter(htmlSummary));
+        String htmlPrefix =
+                "<!DOCTYPE html>\n" +
+                        "<html>\n" +
+                        "<body>";
+        bw.write(htmlPrefix);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(summaryFile))) {
+            while (reader.ready()) {
+                String line = reader.readLine();
+                bw.write(line);
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String htmlPostFix =
+                "</body>\n" +
+                        "</html>";
+        bw.write(htmlPostFix);
+        bw.close();
+        Desktop.getDesktop().browse(htmlSummary.toURI());
+    }
 //-----------------------------------------------------------------------------
 
     /** TODO
@@ -205,7 +229,7 @@ public class Local_App {
 
     private static void deleteMyBuckets(){
         s3.deleteBucket(localAppIdInputBucketName);
-        s3.deleteBucket(localAppIdOutputBucketName);
+//        s3.deleteBucket(localAppIdOutputBucketName);
     }
 
     private static void deleteQueue(){
@@ -220,7 +244,8 @@ public class Local_App {
      * args[2] = outputFile - where to upload the output
      * args[3] = [terminate] - optional, to send to manager indicating to terminate
      */
-    public static void main (String[] args){
+    public static void main (String[] args) throws IOException {
+
         BasicConfigurator.configure();
         getSecurityDetails();
         if(args.length == 3 || args.length == 4) {
@@ -235,8 +260,7 @@ public class Local_App {
                 CreateBucketResponse inputBucket = s3.createBucket(localAppIdInputBucketName);
                 CreateBucketResponse outputBucket =s3.createBucket(localAppIdOutputBucketName);
                 sqs.initQueue(managerToMeQName, "10000");
-                startManager();
-                getOrCreateManager(arn);
+//                getOrCreateManager(arn);
                 try {
                     uploadFiles(new File(("C:\\Users\\orrin\\Desktop\\DSTS ORRI\\src\\main\\resources\\crazyinput.txt")));
                     String msgToManager = localAppId + "\t" + nameOfFileInBucket;
@@ -250,7 +274,10 @@ public class Local_App {
                         List<Message> messages = sqs.retrieveMessages(sqs.getQueueURL(managerToMeQName));
                         for(Message msg : messages){
                             if(msg.body().equals("completed"))
+                                System.out.println(msg.body()+"is the message that received");
                                 taskCompleted = true;
+//                                InputStream is =  s3.getObject(localAppIdOutputBucketName, "summary_file");
+//                                createHtmlSummeryHTML(is);
                         }
                     }
                     System.out.println("DELETED BUCKETS!!!");

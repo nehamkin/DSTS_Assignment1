@@ -41,25 +41,25 @@ public class Workers {
         return "not yet implemented";
     }
 
-    private static void handleMessage (String msg) throws Exception {
-        String[] parsedMsg = msg.split("\t");
-        if(parsedMsg.length < 3){
-            if(parsedMsg.length > 0 && parsedMsg[0] == "terminate"){
-                terminate = true;
-                return;
-            }
-            if(parsedMsg.length == 2){
-                String path = pdf_handler.handleInput(parsedMsg[0], parsedMsg[1]);
-                return;
-            }
-            sqs.sendMessage("bad line exception", workerToManagerQueue);
+    private static void handleMessage (Message message) throws Exception {
+        String msg = message.body();
+        if(msg == "terminate"){
+            terminate = true;
+            return;
         }
+        String[] parsedMsg = msg.split("\t");
         String op = parsedMsg[0];
         String url = parsedMsg[1];
         String localAppId = parsedMsg[2];
+        String msgId = parsedMsg[3];
         String path = pdf_handler.handleInput(op, url);
-        s3.putFileInBucketFromFile(localAppId+"pdfs", "Result", new File(path) );
-        sqs.sendMessage(url+"\t"+path+"\t"+op, workerToManagerQueue);
+        if (path != "bad url"){
+            s3.putFileInBucketFromFile(localAppId+"output", url, new File(path) );
+        }
+        else
+            op = "";
+        sqs.sendMessage(localAppId+"\t"+url+"\t"+path+"\t"+op+"\t"+msgId, workerToManagerQueue);
+
     }
 
     public static void main (String[] args) throws Exception {
@@ -67,16 +67,16 @@ public class Workers {
             List<Message> messages = getMessage();
             for(Message msg : messages){
                 try {
-                    handleMessage(msg.body());
+                    handleMessage(msg);
                 }catch (Exception e){
                     System.out.println("an error occurred handling the file  "+ e.getMessage());
+                }
+                finally {
+                    sqs.deleteMessage(msg,managerToWorkerQueue);
                 }
             }
 
         }
-//        String msg = getMessage1();
-//        handleMessage(msg);
-
         //terminate
     }
 

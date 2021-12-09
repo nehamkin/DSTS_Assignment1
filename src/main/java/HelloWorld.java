@@ -13,32 +13,13 @@ import software.amazon.awssdk.services.s3.S3Client;
 
 
 public class HelloWorld {
+    private static PDF_Handler handler = new PDF_Handler();
+
 
     public static void main(String[] args) throws IOException {
 
-        Region region = Region.US_WEST_2;
-        S3Client s3 = S3Client.builder().region(region).build();
-
-        String bucket = "bucket" + System.currentTimeMillis();
-        String key = "key";
-
-        tutorialSetup(s3, bucket, region);
-
-        System.out.println("Uploading object...");
-
-        s3.putObject(PutObjectRequest.builder().bucket(bucket).key(key)
-                        .build(),
-                RequestBody.fromString("Testing with the {sdk-java}"));
-
-        System.out.println("Upload complete");
-        System.out.printf("%n");
-
-        cleanUp(s3, bucket, key);
-
-        System.out.println("Closing the connection to {S3}");
-        s3.close();
-        System.out.println("Connection closed");
-        System.out.println("Exiting...");
+        String output = handler.handleInput("ToText","http://www.chabad.org/media/pdf/42/kUgi423322.pdf");
+        System.out.println(output);
     }
 
     public static void tutorialSetup(S3Client s3Client, String bucketName, Region region) {

@@ -57,6 +57,16 @@ public class SQS {
                 .build());
     }
 
+    public void deleteMessages(List<Message> messages, String queueUrl){
+        for (Message msg : messages) {
+            DeleteMessageRequest deleteMessageRequest = DeleteMessageRequest.builder()
+                    .queueUrl(queueUrl)
+                    .receiptHandle(msg.receiptHandle())
+                    .build();
+            sqs.deleteMessage(deleteMessageRequest);
+        }
+    }
+
     public List<Message> retrieveMessages(String queueURL){
         ReceiveMessageRequest receiveMessageRequest = ReceiveMessageRequest.builder()
                 .queueUrl(queueURL)
