@@ -98,7 +98,8 @@ public class EC2 {
     }
 
 
-    public void describeEC2Instances( Ec2Client ec2){
+    public int describeEC2Instances( Ec2Client ec2){
+        int numberOfInstances = 0;
         boolean done = false;
         String nextToken = null;
 
@@ -110,12 +111,12 @@ public class EC2 {
 
                 for (Reservation reservation : response.reservations()) {
                     for (Instance instance : reservation.instances()) {
+                        numberOfInstances ++;
                         System.out.println("Instance Id is " + instance.instanceId());
                         System.out.println("Image id is "+  instance.imageId());
                         System.out.println("Instance type is "+  instance.instanceType());
                         System.out.println("Instance state name is "+  instance.state().name());
                         System.out.println("monitoring information is "+  instance.monitoring().state());
-
                     }
                 }
                 nextToken = response.nextToken();
@@ -124,7 +125,9 @@ public class EC2 {
         } catch (Ec2Exception e) {
             System.err.println(e.awsErrorDetails().errorMessage());
             System.exit(1);
+            return 19;
         }
+        return numberOfInstances;
     }
 
     public static void monitorInstance( Ec2Client ec2, String instanceId) {

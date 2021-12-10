@@ -79,8 +79,8 @@ public class PDF_Handler {
         pdfStripper.setEndPage(1);
         String path = "C://Users/orrin/Desktop/DSTS ORRI/src/output/text.txt";
         String text = pdfStripper.getText(document);
-        try (PrintWriter fileDest = new PrintWriter(path)) {
-            fileDest.println(text);
+        try (PrintWriter destination = new PrintWriter(path)) {
+            destination.println(text);
         }
         document.close();
         return path;

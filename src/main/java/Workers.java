@@ -54,11 +54,11 @@ public class Workers {
         String msgId = parsedMsg[3];
         String path = pdf_handler.handleInput(op, url);
         if (path != "bad url"){
-            s3.putFileInBucketFromFile(localAppId+"output", url, new File(path) );
+            s3.putFileInBucketFromFile(localAppId+"output", msgId, new File(path) );
         }
         else
             op = "";
-        sqs.sendMessage(localAppId+"\t"+url+"\t"+path+"\t"+op+"\t"+msgId, workerToManagerQueue);
+        sqs.sendMessage(localAppId+"\t"+url+"\t"+path+"\t"+op+"\t"+msgId+"\t", workerToManagerQueue);
 
     }
 

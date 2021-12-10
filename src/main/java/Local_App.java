@@ -125,8 +125,10 @@ public class Local_App {
     }
 
 
+
+
     private static void createHtmlSummeryHTML(InputStream summaryFile) throws IOException {
-        File htmlSummary = new File("htmlSummary.html");
+        File htmlSummary = new File("C:\\Users\\orrin\\Desktop\\DSTS ORRI\\htmlSummary.html");
         BufferedWriter bw = new BufferedWriter(new FileWriter(htmlSummary));
         String htmlPrefix =
                 "<!DOCTYPE html>\n" +
@@ -136,6 +138,7 @@ public class Local_App {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(summaryFile))) {
             while (reader.ready()) {
                 String line = reader.readLine();
+                System.out.println(line);
                 bw.write(line);
                 bw.newLine();
             }
@@ -247,7 +250,7 @@ public class Local_App {
     public static void main (String[] args) throws IOException {
 
         BasicConfigurator.configure();
-        getSecurityDetails();
+//        getSecurityDetails();
         if(args.length == 3 || args.length == 4) {
             if (args.length == 4) {
                 if (args[3].equals("terminate")){
@@ -263,7 +266,7 @@ public class Local_App {
 //                getOrCreateManager(arn);
                 try {
                     uploadFiles(new File(("C:\\Users\\orrin\\Desktop\\DSTS ORRI\\src\\main\\resources\\crazyinput.txt")));
-                    String msgToManager = localAppId + "\t" + nameOfFileInBucket;
+                    String msgToManager = localAppId + "\t" + nameOfFileInBucket + "\t"+20;
                     sqs.sendMessage(msgToManager, localAppToManagerQueueUrl);
 
                 } catch (Exception e) {
@@ -276,8 +279,8 @@ public class Local_App {
                             if(msg.body().equals("completed"))
                                 System.out.println(msg.body()+"is the message that received");
                                 taskCompleted = true;
-//                                InputStream is =  s3.getObject(localAppIdOutputBucketName, "summary_file");
-//                                createHtmlSummeryHTML(is);
+                                InputStream is =  s3.getObject(localAppIdOutputBucketName, "summary_file");
+                                createHtmlSummeryHTML(is);
                         }
                     }
                     System.out.println("DELETED BUCKETS!!!");
