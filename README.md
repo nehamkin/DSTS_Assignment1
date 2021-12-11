@@ -10,7 +10,7 @@ We have 3 static queues that initialized through the aws website:
 2.ManagerToWorkerQueue
 3.WorkerToManagerQueue
 
-We have a preinitialized bucket that we put our Manager.jar and Worker.jar
+* We have a preinitialized bucket that we put our Manager.jar and Worker.jar
 
 LocalApp:
 1. create a unique id for the localapp
