@@ -7,7 +7,6 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.model.CreateBucketResponse;
 import software.amazon.awssdk.services.sqs.model.Message;
 
-import javax.swing.text.html.HTML;
 import java.awt.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -26,7 +25,7 @@ public class Local_App {
     private static final String localAppIdInputBucketName = localAppId+"input";
     private static final String localAppIdOutputBucketName = localAppId+"output";
     private static final String managerToMeQName = "ManagerTo"+localAppId;
-
+    private static final int WORKERS_PER_COMMAND = 20;
     private static boolean terminate = false;
     private static final String localAppToManagerQueueUrl = "https://sqs.us-east-1.amazonaws.com/812638325025/LocalAppsToManagerQueue";
     private static SQS sqs = new SQS();
@@ -40,7 +39,7 @@ public class Local_App {
         ec2.startInstances(startRequest);
     }
 
-    public static String getOrCreateManager(String arn){ //TODO: Need to add data parameter
+    public static String getOrCreateManager(String arn){
 
         DescribeInstancesRequest request = DescribeInstancesRequest.builder()
                 .build();
@@ -210,37 +209,6 @@ public class Local_App {
         s3.putFileInBucketFromFile(localAppIdInputBucketName,nameOfFileInBucket, f.getAbsoluteFile());
     }
 
-    /** TODO
-      * @param q
-     * sends a message to q with the location of the file on s3
-     */
-    private static void fileLocationMessage(SQS q, String loc){
-    }
-
-    /**TODO
-     * checks if there is a 'done' message in the adapters.SQS
-     */
-    private static boolean done(){
-        return false;
-    }
-
-    /**
-     *
-     * @return a html representing the results
-     */
-    private static HTML createHTML(){
-        return null;
-    }
-
-    private static void getSecurityDetails(){
-        File file = new File("./AssKey.txt");
-        try (BufferedReader bf = new BufferedReader(new FileReader(file))) {
-            arn = bf.readLine();
-            keyName = bf.readLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     private static void deleteMyBuckets(){
         s3.deleteBucket(localAppIdInputBucketName);
@@ -277,9 +245,9 @@ public class Local_App {
                 sqs.initQueue(managerToMeQName, "10000");
                 getOrCreateManager(arn);
                 try {
-                    uploadFiles(new File(("C:\\Users\\orrin\\Desktop\\DSTS ORRI\\src\\main\\resources\\crazyinput.txt")));
-//                    uploadFiles(new File((args[0])));
-                    String msgToManager = localAppId + "\t" + nameOfFileInBucket + "\t"+20;
+//                    uploadFiles(new File(("C:\\Users\\orrin\\Desktop\\DSTS ORRI\\src\\main\\resources\\crazyinput.txt")));
+                    uploadFiles(new File((args[0])));
+                    String msgToManager = localAppId + "\t" + nameOfFileInBucket + "\t"+WORKERS_PER_COMMAND;
                     sqs.sendMessage(msgToManager, localAppToManagerQueueUrl);
                     while(!taskCompleted){
                         List<Message> messages = sqs.retrieveMessages(sqs.getQueueURL(managerToMeQName));

@@ -99,6 +99,7 @@ public class Manager {
 
 
     public static void main (String[] args){
+        final long startTime = System.currentTimeMillis()/1000;
         while(true){
             List<Message> messages = getMessageFromLocalApp();
             for(Message msg : messages){
@@ -122,7 +123,7 @@ public class Manager {
                             if(mbody[2].contentEquals("unable to handle message"))
                                 summary_file.println("<p style=\"color:tomato;\"\n><a >" + mbody[2]+ "\t" + mbody[3] + mbody[4] + "</a></p>\n");
                             else
-                                summary_file.println("<p><a href=\"url\" style=\"background-color:green;>https://"+mbody[1]+"output.s3.amazonaws.com/"+mbody[0]+"</a></p>\n");
+                                summary_file.println("<p><a href=\"url\">"+mbody[4]+"\t"+"https://"+mbody[1]+"output.s3.amazonaws.com/"+mbody[0]+"</a></p>\n");
                            sqs.deleteMessage(m, workerToManagerQueue);                        }
                         notAllTrue = false;
                         for(Boolean b : urlMap.values())
@@ -140,6 +141,9 @@ public class Manager {
                 finally {
                     sqs.deleteMessage(msg,localAppToManagerQueueUrl);
                     notAllTrue = true;
+                    final long finishTime = System.currentTimeMillis()/1000;
+                    final long totalTime = finishTime - startTime;
+                    System.out.println("the time it took to run is: "+ totalTime + " seconds");
                 }
             }
         }
