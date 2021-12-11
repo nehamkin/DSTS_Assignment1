@@ -124,7 +124,7 @@ public class Manager {
                                 summary_file.println("<p style=\"color:tomato;\"\n><a >" + mbody[2]+ "\t" + mbody[3] + mbody[4] + "</a></p>\n");
                             else
                                 summary_file.println("<p><a href=\"url\">"+mbody[4]+"\t"+"https://"+mbody[1]+"output.s3.amazonaws.com/"+mbody[0]+"</a></p>\n");
-                           sqs.deleteMessage(m, workerToManagerQueue);                        }
+                            sqs.deleteMessage(m, workerToManagerQueue);                        }
                         notAllTrue = false;
                         for(Boolean b : urlMap.values())
                             if(!b)

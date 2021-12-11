@@ -228,7 +228,7 @@ public class Local_App {
      * args[3] = [terminate] - optional, to send to manager indicating to terminate
      */
     public static void main (String[] args) throws IOException {
-
+        final long start = System.currentTimeMillis()/1000;
         BasicConfigurator.configure();
 //        getSecurityDetails();
         if(args.length == 3 || args.length == 4) {
@@ -266,6 +266,9 @@ public class Local_App {
                     deleteQueue();
                     deleteMyBuckets();
                     System.out.println("DELETED BUCKETS!!!");
+                    final long finish = System.currentTimeMillis()/1000;
+                    final long total = finish - start;
+                    System.out.println("the total runtime was : "+total+" sec");
                 }
             }
         }
