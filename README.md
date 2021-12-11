@@ -1,5 +1,6 @@
-# DSTS_Assignment1
+# DSTS_Assignment1 - Orri Nehamkin & Yonathan Einan
 DSTS Assignment 1  - https://github.com/nehamkin/DSTS_Assignment1.git
+We were given permisssion by Meni to hand in our assignment via git repo
 
 ![DSPS DIagram drawio](https://user-images.githubusercontent.com/73988005/145674805-57e8f92d-a2fb-4965-9569-488ac3fdb59a.png)
 
@@ -7,6 +8,8 @@ We have 3 static queues that initialized through the aws website:
 1.LocalAppToManagerQueue
 2.ManagerToWorkerQueue
 3.WorkerToManagerQueue
+
+We have a preinitialized bucket that we put our Manager.jar and Worker.jar
 
 LocalApp:
 1. create a unique id for the localapp
@@ -22,6 +25,7 @@ Manager:
 2. get the input file from the localAppIdInputBucket
 3. parse the file line by line
 4. create workers as needed in relation to the number of lines and currently running workers. (Make sure you do not start more than 19)
+    * the number of lines per worker ratio is 20.
 5. send to the ManagerToWorkerQueue a message per each line as the following: msgId + "\t" + localAppId +"\t" + line
     * each message has a unique id, enter into a hashmap the msgId with the value false
 6. listen to workerToManagerQueue - for each recieved message
