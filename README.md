@@ -1,6 +1,6 @@
-# DSTS_Assignment1 - Orri Nehamkin & Yonathan Einan
+# DSTS_Assignment1 - Orri Nehamkin (209831437) & Yonathan Einan (316390533)
+# Permisssion by Meni Adler to hand in our assignment via Git Repository
 DSTS Assignment 1  - https://github.com/nehamkin/DSTS_Assignment1.git
-We were given permisssion by Meni to hand in our assignment via git repo
 
 ![DSPS DIagram drawio](https://user-images.githubusercontent.com/73988005/145674805-57e8f92d-a2fb-4965-9569-488ac3fdb59a.png)
 
@@ -44,5 +44,3 @@ Worker:
 4. upload converted file to localappidoutput bucket
 5. send message of completion to manager
 6. return to step 1
-
-
