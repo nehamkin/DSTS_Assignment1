@@ -110,8 +110,8 @@ public class Manager {
                 }
                 try {
                     String[] localAppMsg = msg.body().split("\t");
-                    String pathToSummaryFile = "C:\\Users\\orrin\\Desktop\\DSTS ORRI\\src\\summary_file_folder\\"+localAppMsg[0]+".txt";
-//                    String pathToSummaryFile = "\\summary_file_folder\\"+localAppMsg[0]+".txt";
+//                    String pathToSummaryFile = "C:\\Users\\orrin\\Desktop\\DSTS ORRI\\src\\summary_file_folder\\"+localAppMsg[0]+".txt";
+                    String pathToSummaryFile = "\\summary_file_folder\\"+localAppMsg[0]+".txt";
                     PrintWriter summary_file = new PrintWriter(pathToSummaryFile,"UTF-8");
                     handleMessage(msg.body());
                     while(notAllTrue){

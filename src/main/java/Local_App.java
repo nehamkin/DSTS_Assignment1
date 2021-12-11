@@ -278,6 +278,7 @@ public class Local_App {
                 getOrCreateManager(arn);
                 try {
                     uploadFiles(new File(("C:\\Users\\orrin\\Desktop\\DSTS ORRI\\src\\main\\resources\\crazyinput.txt")));
+//                    uploadFiles(new File((args[0])));
                     String msgToManager = localAppId + "\t" + nameOfFileInBucket + "\t"+20;
                     sqs.sendMessage(msgToManager, localAppToManagerQueueUrl);
                     while(!taskCompleted){
