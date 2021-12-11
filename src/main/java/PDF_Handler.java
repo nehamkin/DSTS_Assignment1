@@ -33,28 +33,33 @@ public class PDF_Handler {
         }
         catch (Exception e) {
             e.printStackTrace();
+            return "bad url\t"+e.getMessage();
         }
-        return "bad url";
+        return "bad url\t"+"made it to default return in pdf handler";
     }
 
     private static String DownloadFile(String filePath) throws IOException{
-        System.setProperty("http.agent", "Chrome");
+//        System.setProperty("http.agent", "Chrome");
 
-            String pdfPath = "C://Users/orrin/Desktop/DSTS ORRI/src/downloads/download.pdf";
+//        String pdfPath = "C://Users/orrin/Desktop/DSTS ORRI/src/downloads/download.pdf";
+        try {
+            String pdfPath = "downloads/download.pdf";
             URL url = new URL(filePath);
-            HttpURLConnection http = (HttpURLConnection)url.openConnection();
+            HttpURLConnection http = (HttpURLConnection) url.openConnection();
             BufferedInputStream in = new BufferedInputStream(http.getInputStream());
             FileOutputStream fos = new FileOutputStream(pdfPath);
             BufferedOutputStream bout = new BufferedOutputStream(fos);
             byte[] buffer = new byte[1024];
             int read = 0;
-            while ((read = in.read(buffer, 0, 1024)) >= 0){
+            while ((read = in.read(buffer, 0, 1024)) >= 0) {
                 bout.write(buffer, 0, read);
             }
             bout.close();
             in.close();
             System.out.println("Download pdf complete");
             return pdfPath;
+        }
+        catch (Exception e){return e.getMessage();}
     }
 
 
@@ -65,8 +70,10 @@ public class PDF_Handler {
         PDDocument document = PDDocument.load(file);
         PDFRenderer renderer = new PDFRenderer(document);
         BufferedImage image = renderer.renderImage(0);
-        String path = "C://Users/orrin/Desktop/DSTS ORRI/src/output/image.png";
-        ImageIO.write(image, "png", new File("C://Users/orrin/Desktop/DSTS ORRI/src/output/image.png"));
+//        String path = "C://Users/orrin/Desktop/DSTS ORRI/src/output/image.png";
+        String path = "output/image.png";
+//        ImageIO.write(image, "png", new File("C://Users/orrin/Desktop/DSTS ORRI/src/output/image.png"));
+        ImageIO.write(image, "png", new File(path));
         document.close();
         return path;
     }
@@ -77,7 +84,8 @@ public class PDF_Handler {
         PDFTextStripper pdfStripper = new PDFTextStripper();
         pdfStripper.setStartPage(1);
         pdfStripper.setEndPage(1);
-        String path = "C://Users/orrin/Desktop/DSTS ORRI/src/output/text.txt";
+//        String path = "C://Users/orrin/Desktop/DSTS ORRI/src/output/text.txt";
+        String path = "output/text.txt";
         String text = pdfStripper.getText(document);
         try (PrintWriter destination = new PrintWriter(path)) {
             destination.println(text);
@@ -92,7 +100,8 @@ public class PDF_Handler {
         document.addPage((PDPage) pdf.getDocumentCatalog().getPages().get(0));
         document.save("temp_file.pdf");
         document.close();
-        String path = "C://Users/orrin/Desktop/DSTS ORRI/src/output/tohtml.html";
+//        String path = "C://Users/orrin/Desktop/DSTS ORRI/src/output/tohtml.html";
+        String path = "output/tohtml.html";
         Writer output = new PrintWriter(path, "utf-8");
         new PDFDomTree().writeText(document, output);
         pdf.close();

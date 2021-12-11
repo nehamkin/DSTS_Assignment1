@@ -47,18 +47,22 @@ public class Workers {
             terminate = true;
             return;
         }
+        System.out.println("message from manager: "+message.body());
         String[] parsedMsg = msg.split("\t");
-        String op = parsedMsg[0];
-        String url = parsedMsg[1];
-        String localAppId = parsedMsg[2];
-        String msgId = parsedMsg[3];
-        String path = pdf_handler.handleInput(op, url);
-        if (path != "bad url"){
-            s3.putFileInBucketFromFile(localAppId+"output", msgId, new File(path) );
+        String msgId = parsedMsg[0];
+        String localAppId = parsedMsg[1];
+        try {
+            String op = parsedMsg[2];
+            String url = parsedMsg[3];
+            String path = pdf_handler.handleInput(op, url);
+            if (path != "bad url") {
+                s3.putFileInBucketFromFile(localAppId + "output", msgId, new File(path));
+            } else
+                op = "";
+            sqs.sendMessage( msgId + "\t" + localAppId + "\t" + url + "\t" + path + "\t" + op , workerToManagerQueue);
+        } catch (Exception e){
+            sqs.sendMessage( msgId + "\t" + localAppId + "\t" + "unable to handle message"+"\t"+e.getMessage(), workerToManagerQueue);
         }
-        else
-            op = "";
-        sqs.sendMessage(localAppId+"\t"+url+"\t"+path+"\t"+op+"\t"+msgId+"\t", workerToManagerQueue);
 
     }
 

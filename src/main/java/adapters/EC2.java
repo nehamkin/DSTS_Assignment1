@@ -1,34 +1,26 @@
 package adapters;
 
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
-import software.amazon.awssdk.services.ec2.model.InstanceType;
-import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
-import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
-import software.amazon.awssdk.services.ec2.model.Tag;
-import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
-import software.amazon.awssdk.services.ec2.model.Ec2Exception;
-import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
-import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
-import software.amazon.awssdk.services.ec2.model.Instance;
-import software.amazon.awssdk.services.ec2.model.Reservation;
-import software.amazon.awssdk.services.ec2.model.MonitorInstancesRequest;
-import software.amazon.awssdk.services.ec2.model.UnmonitorInstancesRequest;
-import software.amazon.awssdk.services.ec2.model.RebootInstancesRequest;
-import software.amazon.awssdk.services.ec2.model.StopInstancesRequest;
-import software.amazon.awssdk.services.ec2.model.StartInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.*;
 import com.amazonaws.util.Base64;
 
 public class EC2 {
 
-    private static final String amiId = "ami-04902260ca3d33422";
+    private static final String amiId ="ami-00e95a9222311e8ed";
+
 
     public static String createEC2Instance(Ec2Client ec2,String name, String userData, int maxCount, String tag ) {
+        if(getNumberOfNotTerminatedInstances(Ec2Client.builder().region(Region.US_EAST_1).build()) >= 19)
+            return "to many running instances";
         RunInstancesRequest runRequest = RunInstancesRequest.builder()
                 .imageId(amiId)
                 .instanceType(InstanceType.T2_MICRO)
                 .maxCount(maxCount)
                 .minCount(1)
-                .userData(Base64.encodeAsString(userData.getBytes()))
+                .userData(userData)
+                .iamInstanceProfile(IamInstanceProfileSpecification.builder().name("LabInstanceProfile").build())
+                .monitoring(RunInstancesMonitoringEnabled.builder().build())
                 .build();
 
         RunInstancesResponse response = ec2.runInstances(runRequest);
@@ -80,6 +72,39 @@ public class EC2 {
         System.out.printf("Successfully stopped instance %s", instanceId);
     }
 
+    public static void terminateAllInstances(Ec2Client ec2) {
+        String nextToken = null;
+
+        try {
+
+            do {
+                DescribeInstancesRequest request = DescribeInstancesRequest.builder().maxResults(6).nextToken(nextToken).build();
+                DescribeInstancesResponse response = ec2.describeInstances(request);
+
+                for (Reservation reservation : response.reservations()) {
+                    for (Instance instance : reservation.instances()) {
+                        if(instance.tags().get(0).key().equals("Worker")){
+                            StopInstancesRequest stopRequest = StopInstancesRequest.builder()
+                                    .instanceIds(instance.instanceId())
+                                    .build();
+
+                            ec2.stopInstances(stopRequest);
+                            System.out.printf("Successfully stopped instance %s", instance.instanceId());
+                        }
+                    }
+                }
+                nextToken = response.nextToken();
+            } while (nextToken != null);
+
+        } catch (Ec2Exception e) {
+            System.err.println(e.awsErrorDetails().errorMessage());
+            System.exit(1);
+        }
+
+
+    }
+
+
 
     public static void rebootEC2Instance(Ec2Client ec2, String instanceId) {
 
@@ -97,6 +122,61 @@ public class EC2 {
         }
     }
 
+    public static int getNumberOfNotTerminatedInstances (Ec2Client ec2){
+        int numberOfInstances = 0;
+        boolean done = false;
+        String nextToken = null;
+
+        try {
+
+            do {
+                DescribeInstancesRequest request = DescribeInstancesRequest.builder().maxResults(6).nextToken(nextToken).build();
+                DescribeInstancesResponse response = ec2.describeInstances(request);
+
+                for (Reservation reservation : response.reservations()) {
+                    for (Instance instance : reservation.instances()) {
+                        if (instance.state().name().toString() != "terminated")
+                            numberOfInstances ++;
+                    }
+                }
+                nextToken = response.nextToken();
+            } while (nextToken != null);
+
+        } catch (Ec2Exception e) {
+            System.err.println(e.awsErrorDetails().errorMessage());
+            System.exit(1);
+            return 19;
+        }
+        return numberOfInstances;
+    }
+
+    public int getNumberInstances (Ec2Client ec2){
+        int numberOfInstances = 0;
+        boolean done = false;
+        String nextToken = null;
+
+        try {
+
+            do {
+                DescribeInstancesRequest request = DescribeInstancesRequest.builder().maxResults(6).nextToken(nextToken).build();
+                DescribeInstancesResponse response = ec2.describeInstances(request);
+
+                for (Reservation reservation : response.reservations()) {
+                    for (Instance instance : reservation.instances()) {
+                        if (instance.state().name().toString() != "terminated")
+                            numberOfInstances ++;
+                    }
+                }
+                nextToken = response.nextToken();
+            } while (nextToken != null);
+
+        } catch (Ec2Exception e) {
+            System.err.println(e.awsErrorDetails().errorMessage());
+            System.exit(1);
+            return 19;
+        }
+        return numberOfInstances;
+    }
 
     public int describeEC2Instances( Ec2Client ec2){
         int numberOfInstances = 0;
@@ -111,7 +191,8 @@ public class EC2 {
 
                 for (Reservation reservation : response.reservations()) {
                     for (Instance instance : reservation.instances()) {
-                        numberOfInstances ++;
+                        if (instance.state().name().toString() != "terminated")
+                            numberOfInstances ++;
                         System.out.println("Instance Id is " + instance.instanceId());
                         System.out.println("Image id is "+  instance.imageId());
                         System.out.println("Instance type is "+  instance.instanceType());

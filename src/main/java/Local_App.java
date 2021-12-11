@@ -70,7 +70,7 @@ public class Local_App {
 
         } while(nextToken != null);
 
-        return createManagerInstance("ami-04902260ca3d33422", arn);
+        return createManagerInstance("ami-00e95a9222311e8ed", arn);
     }
 
     private static String createManagerInstance(String amiId, String arn) {
@@ -115,9 +115,8 @@ public class Local_App {
 
     private static String getManagerScript(String arn) {
         String script =  "#!/bin/bash\n" +
-                "sudo yum install -y java-1.8.0-openjdk\n" +
-                "sudo yum update -y\n" +
                 "mkdir jars\n" +
+                "mkdir summary_file_folder\n" +
                 "aws s3 cp s3://jarsbucketorri/Manager.jar ./jars/Manager.jar\n" +
                 "java -jar /jars/Manager.jar\n";
 
@@ -125,7 +124,18 @@ public class Local_App {
     }
 
 
-
+    private static String convertInputStreamToString(InputStream inputStream) throws IOException {
+        final char[] buffer = new char[8192];
+        final StringBuilder result = new StringBuilder();
+        // InputStream -> Reader
+        try (Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+            int charsRead;
+            while ((charsRead = reader.read(buffer, 0, buffer.length)) > 0) {
+                result.append(buffer, 0, charsRead);
+            }
+        }
+        return result.toString();
+    }
 
     private static void createHtmlSummeryHTML(InputStream summaryFile) throws IOException {
         File htmlSummary = new File("C:\\Users\\orrin\\Desktop\\DSTS ORRI\\htmlSummary.html");
@@ -135,14 +145,16 @@ public class Local_App {
                         "<html>\n" +
                         "<body>";
         bw.write(htmlPrefix);
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(summaryFile))) {
-            while (reader.ready()) {
-                String line = reader.readLine();
+        try  {
+            String summary = convertInputStreamToString(summaryFile);
+            String[] lines = summary.split("\n");
+            for(String line : lines) {
                 System.out.println(line);
                 bw.write(line);
                 bw.newLine();
             }
-        } catch (IOException e) {
+        }
+         catch (IOException e) {
             e.printStackTrace();
         }
         String htmlPostFix =
@@ -232,7 +244,7 @@ public class Local_App {
 
     private static void deleteMyBuckets(){
         s3.deleteBucket(localAppIdInputBucketName);
-//        s3.deleteBucket(localAppIdOutputBucketName);
+        s3.deleteBucket(localAppIdOutputBucketName);
     }
 
     private static void deleteQueue(){
@@ -263,29 +275,28 @@ public class Local_App {
                 CreateBucketResponse inputBucket = s3.createBucket(localAppIdInputBucketName);
                 CreateBucketResponse outputBucket =s3.createBucket(localAppIdOutputBucketName);
                 sqs.initQueue(managerToMeQName, "10000");
-//                getOrCreateManager(arn);
+                getOrCreateManager(arn);
                 try {
                     uploadFiles(new File(("C:\\Users\\orrin\\Desktop\\DSTS ORRI\\src\\main\\resources\\crazyinput.txt")));
                     String msgToManager = localAppId + "\t" + nameOfFileInBucket + "\t"+20;
                     sqs.sendMessage(msgToManager, localAppToManagerQueueUrl);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                finally {
                     while(!taskCompleted){
                         List<Message> messages = sqs.retrieveMessages(sqs.getQueueURL(managerToMeQName));
                         for(Message msg : messages){
                             if(msg.body().equals("completed"))
                                 System.out.println(msg.body()+"is the message that received");
-                                taskCompleted = true;
-                                InputStream is =  s3.getObject(localAppIdOutputBucketName, "summary_file");
-                                createHtmlSummeryHTML(is);
+                            taskCompleted = true;
+                            InputStream is =  s3.getObject(localAppIdOutputBucketName, "summary_file");
+                            createHtmlSummeryHTML(is);
                         }
                     }
-                    System.out.println("DELETED BUCKETS!!!");
-                    deleteMyBuckets();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                finally {
                     deleteQueue();
+                    deleteMyBuckets();
+                    System.out.println("DELETED BUCKETS!!!");
                 }
             }
         }
