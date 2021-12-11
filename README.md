@@ -1,3 +1,4 @@
+
 # DSTS_Assignment1 - Orri Nehamkin & Yonathan Einan
 * Permisssion by Meni Adler to hand in our assignment via Git Repository
 * Orri Nehamkin (209831437), Yonathan Einan (316390533)
@@ -26,7 +27,8 @@ Manager:
 2. get the input file from the localAppIdInputBucket
 3. parse the file line by line
 4. create workers as needed in relation to the number of lines and currently running workers. (Make sure you do not start more than 19)
-    * the number of lines per worker ratio is 20.
+    * the number of lines per worker ratio is 20 as default.
+    * the time it took to run the short input is 120 seconds.
 5. send to the ManagerToWorkerQueue a message per each line as the following: msgId + "\t" + localAppId +"\t" + line
     * each message has a unique id, enter into a hashmap the msgId with the value false
 6. listen to workerToManagerQueue - for each recieved message
