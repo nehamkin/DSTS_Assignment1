@@ -6,9 +6,9 @@
 ![DSPS DIagram drawio](https://user-images.githubusercontent.com/73988005/145674805-57e8f92d-a2fb-4965-9569-488ac3fdb59a.png)
 
 We have 3 static queues that initialized through the aws website:
-1.LocalAppToManagerQueue
-2.ManagerToWorkerQueue
-3.WorkerToManagerQueue
+* 1.LocalAppToManagerQueue
+* 2.ManagerToWorkerQueue
+* 3.WorkerToManagerQueue
 
 * We have a preinitialized bucket that we put our Manager.jar and Worker.jar
 
